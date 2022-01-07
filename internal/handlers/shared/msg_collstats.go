@@ -16,6 +16,7 @@ package shared
 
 import (
 	"context"
+	"errors"
 
 	"github.com/FerretDB/FerretDB/internal/types"
 	"github.com/FerretDB/FerretDB/internal/util/lazyerrors"
@@ -30,7 +31,10 @@ func (h *Handler) MsgCollStats(ctx context.Context, msg *wire.OpMsg) (*wire.OpMs
 	}
 
 	m := document.Map()
-	collection := m["collStats"].(string)
+	collection, ok := m["collStats"].(string)
+	if !ok {
+		return nil, errors.New("no such command: " + document.Keys()[0])
+	}
 	db, ok := m["$db"].(string)
 	if !ok {
 		return nil, lazyerrors.New("no db")
